@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode / build output
+build/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+**/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Misc
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Notes:
+# - The Xcode project is committed for convenience, but it's generated from
+#   project.yml by XcodeGen. If you edit targets/settings, edit project.yml and
+#   run `xcodegen generate`.
