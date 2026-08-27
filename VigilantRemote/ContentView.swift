@@ -39,10 +39,10 @@ struct ContentView: View {
                 .foregroundStyle(state.enabled ? .green : .secondary)
                 .contentTransition(.symbolEffect(.replace))
 
-            Text(state.enabled ? "Vigilant is ON" : "Vigilant is OFF")
+            Text(state.enabled ? "Sentry on duty" : "Sentry off duty")
                 .font(.title2.bold())
 
-            Toggle("Enabled", isOn: Binding(
+            Toggle("Sentry", isOn: Binding(
                 get: { state.enabled },
                 set: { model.setEnabled($0) }
             ))
@@ -111,7 +111,7 @@ struct ContentView: View {
                 Text("Follow work schedule")
                     .font(.subheadline.weight(.medium))
             }
-            Text("When on, the Mac only stays active during your Mon–Fri work hours and skips holidays. When off, it runs whenever Vigilant is enabled.")
+            Text("When on, the Mac only stays active during your Mon–Fri work hours and skips holidays. When off, it runs whenever Sentry is on.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

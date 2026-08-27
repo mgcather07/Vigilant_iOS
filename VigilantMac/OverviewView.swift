@@ -58,7 +58,7 @@ struct OverviewView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(state.enabled ? "Vigilant is ON" : "Vigilant is OFF")
+                Text(state.enabled ? "Sentry on duty" : "Sentry off duty")
                     .font(.largeTitle.bold())
                 Text(controller.statusLine)
                     .font(.title3)
@@ -110,7 +110,7 @@ struct OverviewView: View {
 
     private var scheduleSummary: String {
         if !state.scheduleEnabled {
-            return "Off — Vigilant runs continuously while enabled."
+            return "Off — Sentry stays on watch continuously while on duty."
         }
         if let day = VigilantSettings.shared.schedule.todaysWindow() {
             return "Today: \(timeString(day.start))–\(timeString(day.end)), holidays skipped."

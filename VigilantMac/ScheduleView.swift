@@ -47,7 +47,7 @@ struct ScheduleView: View {
                 .font(.title2).foregroundStyle(.tint).frame(width: 30)
             VStack(alignment: .leading, spacing: 3) {
                 Text("Follow work schedule").font(.headline)
-                Text("When on, Vigilant only stays active during the enabled windows below and skips holidays. When off, it runs whenever enabled.")
+                Text("When on, Sentry only stays active during the enabled windows below and skips holidays. When off, it runs whenever Sentry is on.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer()

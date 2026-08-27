@@ -95,7 +95,7 @@ struct RootView: View {
                 get: { controller.store.state.enabled },
                 set: { _ in controller.toggleEnabled() }
             )) {
-                Label(controller.store.state.enabled ? "Enabled" : "Disabled",
+                Label(controller.store.state.enabled ? "Sentry on duty" : "Sentry off duty",
                       systemImage: controller.store.state.enabled ? "bolt.fill" : "bolt.slash")
                     .font(.subheadline.weight(.medium))
             }

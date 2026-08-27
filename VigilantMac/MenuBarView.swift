@@ -18,7 +18,7 @@ struct MenuBarView: View {
 
             Divider()
 
-            Toggle("Vigilant enabled", isOn: Binding(
+            Toggle("Sentry", isOn: Binding(
                 get: { state.enabled },
                 set: { _ in controller.toggleEnabled() }
             ))
@@ -29,7 +29,7 @@ struct MenuBarView: View {
                 set: { _ in controller.toggleSchedule() }
             ))
             .toggleStyle(.switch)
-            .help("When on, Vigilant only runs during your Mon–Fri work hours and skips holidays.")
+            .help("When on, Sentry only runs during your Mon–Fri work hours and skips holidays.")
 
             if !controller.accessibilityTrusted {
                 accessibilityWarning

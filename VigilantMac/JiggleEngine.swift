@@ -66,7 +66,7 @@ final class JiggleEngine {
 
     func beginPreventSleep() {
         guard !holdingAssertion else { return }
-        let reason = "Vigilant is keeping this Mac active" as CFString
+        let reason = "Vigilant: Sentry is keeping this Mac awake" as CFString
         let result = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleSystemSleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),

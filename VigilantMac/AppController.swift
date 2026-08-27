@@ -167,14 +167,14 @@ final class AppController {
 
     private func describe(now: Date) -> String {
         let s = store.state
-        if !s.enabled { return "Off" }
-        if !s.scheduleEnabled { return isActive ? "On — keeping active" : "On" }
+        if !s.enabled { return "Off duty — this Mac can sleep" }
+        if !s.scheduleEnabled { return isActive ? "Keeping this Mac awake" : "On duty" }
         if calendar.isHoliday(now) {
             let name = calendar.holidayName(now) ?? "Holiday"
-            return "On — paused for \(name)"
+            return "Paused for \(name)"
         }
-        if settings.schedule.isWithinWindow(now) { return "On — within work hours" }
-        return "On — outside work hours"
+        if settings.schedule.isWithinWindow(now) { return "On watch — work hours" }
+        return "Off watch — outside work hours"
     }
 
     private static func relevantYears() -> [Int] {

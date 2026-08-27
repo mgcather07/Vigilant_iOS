@@ -19,9 +19,9 @@ enum MacStatus: String, Sendable, Codable {
 
     var displayName: String {
         switch self {
-        case .running:     return "Running"
-        case .idleEnabled: return "On — waiting"
-        case .off:         return "Off"
+        case .running:     return "Standing guard"
+        case .idleEnabled: return "On duty — waiting"
+        case .off:         return "Off duty"
         case .unknown:     return "Unknown"
         }
     }
