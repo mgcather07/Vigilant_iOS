@@ -10,7 +10,7 @@
 	<array>
 		<string>iCloud.io.vigilant.co.Vigilant</string>
 	</array>
-	<key>aps-environment</key>
+	<key>com.apple.developer.aps-environment</key>
 	<string>development</string>
 </dict>
 </plist>
