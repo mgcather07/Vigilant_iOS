@@ -93,7 +93,7 @@ struct RootView: View {
             Divider()
             Toggle(isOn: Binding(
                 get: { controller.store.state.enabled },
-                set: { _ in controller.toggleEnabled() }
+                set: { controller.setActive($0) }
             )) {
                 Label(controller.store.state.enabled ? "Sentry on duty" : "Sentry off duty",
                       systemImage: controller.store.state.enabled ? "bolt.fill" : "bolt.slash")

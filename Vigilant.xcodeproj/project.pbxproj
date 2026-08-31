@@ -12,9 +12,13 @@
 		12C933AC72C00E00DBF80611 /* SystemSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5386AC332300D8F528C6D6DE /* SystemSnapshot.swift */; };
 		165BEAB8CB4D66C0E7329DAB /* WorkSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A9992FC46A4ACB2F3ACB51 /* WorkSchedule.swift */; };
 		1AE3E5837AC38594886D448D /* BusinessCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFEFA454023EDCFF7521656A /* BusinessCalendar.swift */; };
+		1D50B9FE5640C43ABCCE8CCD /* MemoryUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB5367F0D93F7D1E665B9F9 /* MemoryUsageView.swift */; };
+		2097AF33BB3CDF967EF81BE2 /* LogTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9628FD3E020B7FDEC866F2B /* LogTab.swift */; };
 		257CFAB6362C2B355309713C /* BusinessCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFEFA454023EDCFF7521656A /* BusinessCalendar.swift */; };
 		28C1895B8A4738F32F14CEAA /* WorkSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A9992FC46A4ACB2F3ACB51 /* WorkSchedule.swift */; };
+		2F306A6C413F6B200B760B1C /* SentryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DFF96E93721A708E50EA7E /* SentryLog.swift */; };
 		3049890A0C291E9810B7AF91 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F4BB717C29F7FEF4045FCCE /* Assets.xcassets */; };
+		37E09DDA453C7029546F6614 /* ScheduleTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B8973A1CFC22B1D796A6B85 /* ScheduleTab.swift */; };
 		3B07A70C6CC8ED9537DAC3E6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F1E0D8F4E896A5A9EB89CA /* RootView.swift */; };
 		3B4FCFEFB9A3355D8671FA73 /* JiggleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706B48141F54B61F82F64725 /* JiggleEngine.swift */; };
 		40F55574CD3D3912F761B249 /* VigilantApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DEE9FE142E0826B4797733E /* VigilantApp.swift */; };
@@ -25,6 +29,7 @@
 		73528FE47A27F9CC78C33DB0 /* RemoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774B16230C7534D21B2434A /* RemoteModel.swift */; };
 		80FF4D2630229AEC5F37452C /* ScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA88B68C454CEBDED81D648 /* ScheduleView.swift */; };
 		915067771A10205ECA48C871 /* MetricCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BEA0494B740D223CC9C67F /* MetricCards.swift */; };
+		921DEC376C042EC8D6F782AE /* SentryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DFF96E93721A708E50EA7E /* SentryLog.swift */; };
 		A25623DB04AA3BB7F8347E21 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33530CC7C8090CAED639718 /* MenuBarView.swift */; };
 		A770BBAAD067BE8F03E24F72 /* CloudKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABE1102CD93ABA4D0600BC2 /* CloudKitStore.swift */; };
 		BC3A629A25908B9ABE368033 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2486F458F1AF95F02D5D44 /* OverviewView.swift */; };
@@ -39,6 +44,7 @@
 
 /* Begin PBXFileReference section */
 		0ABE1102CD93ABA4D0600BC2 /* CloudKitStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitStore.swift; sourceTree = "<group>"; };
+		0B8973A1CFC22B1D796A6B85 /* ScheduleTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleTab.swift; sourceTree = "<group>"; };
 		17A9992FC46A4ACB2F3ACB51 /* WorkSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkSchedule.swift; sourceTree = "<group>"; };
 		2DDC556C39AD42F5FEBC8CB2 /* VigilantState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VigilantState.swift; sourceTree = "<group>"; };
 		3115F9510C359A6608EB611D /* Vigilant.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vigilant.entitlements; sourceTree = "<group>"; };
@@ -58,6 +64,8 @@
 		88A7406F937B3390E0B3CB3E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		90244D922D89E7D8DE1C44E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9DEE9FE142E0826B4797733E /* VigilantApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VigilantApp.swift; sourceTree = "<group>"; };
+		A9628FD3E020B7FDEC866F2B /* LogTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTab.swift; sourceTree = "<group>"; };
+		AAB5367F0D93F7D1E665B9F9 /* MemoryUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryUsageView.swift; sourceTree = "<group>"; };
 		ADA88B68C454CEBDED81D648 /* ScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleView.swift; sourceTree = "<group>"; };
 		C774B16230C7534D21B2434A /* RemoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteModel.swift; sourceTree = "<group>"; };
 		CFA7E85C707563471EE6761E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -65,6 +73,7 @@
 		DFEFA454023EDCFF7521656A /* BusinessCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessCalendar.swift; sourceTree = "<group>"; };
 		E8EC0A972DF62F64DAB3507C /* Vigilant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vigilant.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC2486F458F1AF95F02D5D44 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		F4DFF96E93721A708E50EA7E /* SentryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryLog.swift; sourceTree = "<group>"; };
 		F5EDED7892CF103E277760D6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,6 +84,7 @@
 				DFEFA454023EDCFF7521656A /* BusinessCalendar.swift */,
 				0ABE1102CD93ABA4D0600BC2 /* CloudKitStore.swift */,
 				57BEA0494B740D223CC9C67F /* MetricCards.swift */,
+				F4DFF96E93721A708E50EA7E /* SentryLog.swift */,
 				5386AC332300D8F528C6D6DE /* SystemSnapshot.swift */,
 				2DDC556C39AD42F5FEBC8CB2 /* VigilantState.swift */,
 				17A9992FC46A4ACB2F3ACB51 /* WorkSchedule.swift */,
@@ -119,7 +129,10 @@
 				3F4BB717C29F7FEF4045FCCE /* Assets.xcassets */,
 				90244D922D89E7D8DE1C44E7 /* ContentView.swift */,
 				CFA7E85C707563471EE6761E /* Info.plist */,
+				A9628FD3E020B7FDEC866F2B /* LogTab.swift */,
+				AAB5367F0D93F7D1E665B9F9 /* MemoryUsageView.swift */,
 				C774B16230C7534D21B2434A /* RemoteModel.swift */,
+				0B8973A1CFC22B1D796A6B85 /* ScheduleTab.swift */,
 				476C5AAF4FE7F8A9B3858D76 /* VigilantRemote.entitlements */,
 				7FA54196D87850A1EA39E4A5 /* VigilantRemoteApp.swift */,
 			);
@@ -240,8 +253,12 @@
 				257CFAB6362C2B355309713C /* BusinessCalendar.swift in Sources */,
 				C0A8FCA1F34571E63DCA99D5 /* CloudKitStore.swift in Sources */,
 				F08CFF931F6AAFAEE60E4600 /* ContentView.swift in Sources */,
+				2097AF33BB3CDF967EF81BE2 /* LogTab.swift in Sources */,
+				1D50B9FE5640C43ABCCE8CCD /* MemoryUsageView.swift in Sources */,
 				915067771A10205ECA48C871 /* MetricCards.swift in Sources */,
 				73528FE47A27F9CC78C33DB0 /* RemoteModel.swift in Sources */,
+				37E09DDA453C7029546F6614 /* ScheduleTab.swift in Sources */,
+				2F306A6C413F6B200B760B1C /* SentryLog.swift in Sources */,
 				E0D1A852A1B53C99E8E34591 /* SystemSnapshot.swift in Sources */,
 				C8897756C77949690AFD46C1 /* VigilantRemoteApp.swift in Sources */,
 				DE3A95688F3EC9F97F0259E6 /* VigilantState.swift in Sources */,
@@ -264,6 +281,7 @@
 				BC3A629A25908B9ABE368033 /* OverviewView.swift in Sources */,
 				3B07A70C6CC8ED9537DAC3E6 /* RootView.swift in Sources */,
 				80FF4D2630229AEC5F37452C /* ScheduleView.swift in Sources */,
+				921DEC376C042EC8D6F782AE /* SentryLog.swift in Sources */,
 				47342AE381C07E12FEE10E97 /* SystemMetrics.swift in Sources */,
 				12C933AC72C00E00DBF80611 /* SystemSnapshot.swift in Sources */,
 				40F55574CD3D3912F761B249 /* VigilantApp.swift in Sources */,

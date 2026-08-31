@@ -47,6 +47,23 @@ struct VigilantState: Sendable, Equatable {
     /// Latest system-monitoring snapshot reported by the Mac (nil until first heartbeat).
     var metrics: SystemSnapshot?
 
+    // ---- Synced side-data so the phone can do more than toggle ----
+    /// The weekly work schedule, synced so the phone can view/edit it. nil until first sync.
+    var schedule: WorkSchedule? = nil
+    /// Recent Sentry on/off transitions (most recent last), capped by the writer.
+    var events: [SentryEvent] = []
+    /// Upcoming holidays the Mac will skip, precomputed for read-only display.
+    var upcomingHolidays: [HolidayItem] = []
+    /// When set to a future time, Sentry is on a temporary lunch break until then;
+    /// the Mac resumes it automatically. nil when not on a break.
+    var lunchUntil: Date? = nil
+
+    /// Whether a lunch break is currently in effect.
+    func isOnLunch(now: Date = Date()) -> Bool {
+        guard let until = lunchUntil else { return false }
+        return now < until
+    }
+
     static let `default` = VigilantState(
         enabled: false,
         scheduleEnabled: false,

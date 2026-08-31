@@ -38,16 +38,42 @@ final class RemoteModel {
 
     // MARK: - Actions
 
-    func setEnabled(_ on: Bool) {
+    func setActive(_ on: Bool) {
         isBusy = true
         Task {
-            await store.setEnabled(on, source: "iPhone")
+            await store.setActive(on, source: "iPhone")
             isBusy = false
         }
     }
 
-    func setScheduleEnabled(_ on: Bool) {
-        Task { await store.setScheduleEnabled(on, source: "iPhone") }
+    /// Push edited work-schedule windows up to CloudKit (the Mac adopts them).
+    func setSchedule(_ schedule: WorkSchedule) {
+        isBusy = true
+        Task {
+            await store.setSchedule(schedule, source: "iPhone")
+            isBusy = false
+        }
+    }
+
+    // MARK: - Lunch break
+
+    /// Pause Sentry for `minutes` (default 60); the Mac resumes it automatically.
+    func startLunch(minutes: Int = 60) {
+        let until = Date().addingTimeInterval(TimeInterval(minutes) * 60)
+        isBusy = true
+        Task {
+            await store.startLunch(until: until, source: "iPhone")
+            isBusy = false
+        }
+    }
+
+    /// End a lunch break early and resume Sentry now.
+    func cancelLunch() {
+        isBusy = true
+        Task {
+            await store.endLunch(source: "iPhone")
+            isBusy = false
+        }
     }
 
     // MARK: - Polling fallback (every 20s while foregrounded)

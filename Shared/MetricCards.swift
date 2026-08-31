@@ -14,6 +14,9 @@ struct MetricsGrid: View {
     var stale: Bool = false
     /// When set, every card is forced to this exact height (uniform grid).
     var uniformHeight: CGFloat? = nil
+    /// When set, the Top Memory card becomes tappable (shows a chevron) and
+    /// calls this to open a full memory-usage screen.
+    var onSelectMemory: (() -> Void)? = nil
 
     private let columns = [GridItem(.adaptive(minimum: 240, maximum: 360), spacing: 14, alignment: .top)]
 
@@ -25,6 +28,14 @@ struct MetricsGrid: View {
                 LoadAverageCard(snapshot: snapshot)
                 ProcessesCard(snapshot: snapshot)
                 MemoryCard(snapshot: snapshot)
+                if let onSelectMemory {
+                    Button(action: onSelectMemory) {
+                        TopMemoryCard(snapshot: snapshot, showsChevron: true)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    TopMemoryCard(snapshot: snapshot)
+                }
                 DiskCard(snapshot: snapshot)
                 NetworkCard(snapshot: snapshot)
             }
@@ -270,6 +281,62 @@ struct LoadAverageCard: View {
         guard snapshot.cpuCoreCount > 0 else { return .primary }
         let ratio = snapshot.loadAvg1 / Double(snapshot.cpuCoreCount)
         return ratio > 1 ? .red : (ratio > 0.7 ? .orange : .green)
+    }
+}
+
+struct TopMemoryCard: View {
+    let snapshot: SystemSnapshot
+    var showsChevron: Bool = false
+
+    private var maxBytes: UInt64 {
+        snapshot.topMemoryProcesses.first?.memoryBytes ?? 1
+    }
+
+    var body: some View {
+        MetricCard(title: "Top Memory", systemImage: "chart.bar.fill") {
+            if snapshot.topMemoryProcesses.isEmpty {
+                Text("—").font(.caption).foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(snapshot.topMemoryProcesses.prefix(5)) { proc in
+                        row(proc)
+                    }
+                    if showsChevron && snapshot.topMemoryProcesses.count > 5 {
+                        Text("+\(snapshot.topMemoryProcesses.count - 5) more…")
+                            .font(.caption2).foregroundStyle(.tint)
+                    }
+                }
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(14)
+            }
+        }
+    }
+
+    private func row(_ proc: ProcessMemory) -> some View {
+        let fraction = maxBytes == 0 ? 0 : Double(proc.memoryBytes) / Double(maxBytes)
+        return VStack(spacing: 3) {
+            HStack(spacing: 6) {
+                Text(proc.name).lineLimit(1).truncationMode(.middle)
+                Spacer(minLength: 4)
+                Text(MetricFormat.bytes(proc.memoryBytes))
+                    .monospacedDigit().foregroundStyle(.secondary).fixedSize()
+            }
+            .font(.caption)
+            GeometryReader { geo in
+                Capsule().fill(.secondary.opacity(0.15))
+                    .overlay(alignment: .leading) {
+                        Capsule().fill(.blue.gradient)
+                            .frame(width: max(2, geo.size.width * fraction))
+                    }
+            }
+            .frame(height: 4)
+        }
     }
 }
 

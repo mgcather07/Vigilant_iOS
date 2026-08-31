@@ -135,6 +135,59 @@ final class CloudKitStore {
         }
     }
 
+    /// Turn Sentry on or off. Sentry always runs on the work schedule, so
+    /// turning it on also arms the schedule (both flags in one write).
+    func setActive(_ on: Bool, source: String) async {
+        await modify(source: source) { record in
+            record["enabled"] = (on ? 1 : 0) as Int64
+            record["scheduleEnabled"] = 1 as Int64
+        }
+    }
+
+    // MARK: - Synced schedule / log / holidays
+
+    /// Publish the weekly work schedule so both devices share it (editable
+    /// from the Mac or the phone).
+    func setSchedule(_ schedule: WorkSchedule, source: String) async {
+        await modify(source: source, touchUpdatedAt: false) { record in
+            record["scheduleJSON"] = (SyncCoding.encode(schedule) ?? "") as String
+        }
+    }
+
+    /// Append one on/off transition to the rolling log (keeps the last `keep`).
+    func appendEvent(on: Bool, reason: String, trigger: SentryTrigger,
+                     at date: Date = Date(), keep: Int = 50, source: String) async {
+        await modify(source: source, touchUpdatedAt: false) { record in
+            var events = Self.events(from: record)
+            events.append(SentryEvent(date: date, on: on, reason: reason, trigger: trigger))
+            if events.count > keep { events = Array(events.suffix(keep)) }
+            record["eventLog"] = (SyncCoding.encode(events) ?? "") as String
+        }
+    }
+
+    /// Publish the precomputed upcoming-holidays list for read-only display.
+    func setUpcomingHolidays(_ holidays: [HolidayItem], source: String) async {
+        await modify(source: source, touchUpdatedAt: false) { record in
+            record["upcomingHolidays"] = (SyncCoding.encode(holidays) ?? "") as String
+        }
+    }
+
+    // MARK: - Lunch break (timed override)
+
+    /// Start a lunch break: Sentry pauses until `until`, then the Mac resumes it.
+    func startLunch(until date: Date, source: String) async {
+        await modify(source: source) { record in
+            record["lunchUntil"] = date as Date
+        }
+    }
+
+    /// Clear the lunch break (early cancel from a device, or auto-resume by the Mac).
+    func endLunch(source: String) async {
+        await modify(source: source) { record in
+            record["lunchUntil"] = nil
+        }
+    }
+
     // MARK: - Writing (Mac heartbeat)
 
     func reportMac(status: MacStatus, lastActivity: Date?, metrics: SystemSnapshot? = nil, now: Date = Date()) async {
@@ -253,7 +306,15 @@ final class CloudKitStore {
             macStatus: MacStatus(rawValue: statusRaw) ?? .unknown,
             macLastSeen: record["macLastSeen"] as? Date,
             macLastActivity: record["macLastActivity"] as? Date,
-            metrics: SystemSnapshot.from(jsonString: record["metrics"] as? String)
+            metrics: SystemSnapshot.from(jsonString: record["metrics"] as? String),
+            schedule: SyncCoding.decode(WorkSchedule.self, from: record["scheduleJSON"] as? String),
+            events: SyncCoding.decode([SentryEvent].self, from: record["eventLog"] as? String) ?? [],
+            upcomingHolidays: SyncCoding.decode([HolidayItem].self, from: record["upcomingHolidays"] as? String) ?? [],
+            lunchUntil: record["lunchUntil"] as? Date
         )
+    }
+
+    private static func events(from record: CKRecord) -> [SentryEvent] {
+        SyncCoding.decode([SentryEvent].self, from: record["eventLog"] as? String) ?? []
     }
 }

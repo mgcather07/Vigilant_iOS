@@ -62,8 +62,69 @@ final class SystemMetrics {
             loadAvg5: load.1,
             loadAvg15: load.2,
             cpuCoreCount: ProcessInfo.processInfo.activeProcessorCount,
-            processCount: processCount()
+            processCount: processCount(),
+            topMemoryProcesses: topMemoryProcesses()
         )
+    }
+
+    // MARK: - Top memory processes
+
+    /// Top processes by **physical memory footprint** — the same metric
+    /// Activity Monitor's "Memory" column shows (it counts compressed memory
+    /// and shared pages the way the memory ledger does, unlike RSS). Read
+    /// per-process via `proc_pid_rusage`, which needs no special entitlement
+    /// for the current user's processes.
+    private func topMemoryProcesses(limit: Int = 25) -> [ProcessMemory] {
+        let capacity = proc_listallpids(nil, 0)
+        guard capacity > 0 else { return [] }
+        var pids = [pid_t](repeating: 0, count: Int(capacity))
+        let returned = proc_listallpids(&pids, Int32(Int(capacity) * MemoryLayout<pid_t>.size))
+        guard returned > 0 else { return [] }
+
+        var footprints: [(pid: pid_t, bytes: UInt64)] = []
+        footprints.reserveCapacity(Int(returned))
+        for i in 0..<Int(returned) {
+            let pid = pids[i]
+            guard pid > 0, let bytes = physFootprint(pid: pid), bytes > 0 else { continue }
+            footprints.append((pid, bytes))
+        }
+        footprints.sort { $0.bytes > $1.bytes }
+
+        return footprints.prefix(limit).map {
+            ProcessMemory(pid: Int($0.pid), name: processName(pid: $0.pid), memoryBytes: $0.bytes)
+        }
+    }
+
+    /// Physical memory footprint (bytes) for a pid, or nil if inaccessible.
+    private func physFootprint(pid: pid_t) -> UInt64? {
+        var info = rusage_info_v2()
+        let rc = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: (rusage_info_t?).self, capacity: 1) {
+                proc_pid_rusage(pid, RUSAGE_INFO_V2, $0)
+            }
+        }
+        return rc == 0 ? info.ri_phys_footprint : nil
+    }
+
+    /// Best-effort human name for a pid: the executable's last path component.
+    private func processName(pid: pid_t) -> String {
+        var pathBuf = [CChar](repeating: 0, count: 4096)
+        if proc_pidpath(pid, &pathBuf, UInt32(pathBuf.count)) > 0 {
+            return shortProcessName(String(cString: pathBuf))
+        }
+        var nameBuf = [CChar](repeating: 0, count: 256)
+        if proc_name(pid, &nameBuf, UInt32(nameBuf.count)) > 0 {
+            return String(cString: nameBuf)
+        }
+        return "pid \(pid)"
+    }
+
+    /// Turn "/Applications/Foo.app/Contents/MacOS/Foo" into "Foo".
+    private func shortProcessName(_ path: String) -> String {
+        if let slash = path.lastIndex(of: "/") {
+            return String(path[path.index(after: slash)...])
+        }
+        return path
     }
 
     // MARK: - Load average & processes

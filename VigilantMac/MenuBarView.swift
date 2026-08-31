@@ -20,16 +20,10 @@ struct MenuBarView: View {
 
             Toggle("Sentry", isOn: Binding(
                 get: { state.enabled },
-                set: { _ in controller.toggleEnabled() }
+                set: { controller.setActive($0) }
             ))
             .toggleStyle(.switch)
-
-            Toggle("Follow work schedule", isOn: Binding(
-                get: { state.scheduleEnabled },
-                set: { _ in controller.toggleSchedule() }
-            ))
-            .toggleStyle(.switch)
-            .help("When on, Sentry only runs during your Mon–Fri work hours and skips holidays.")
+            .help("When on, Sentry runs on your work schedule — active during Mon–Fri work hours, skipping holidays.")
 
             if !controller.accessibilityTrusted {
                 accessibilityWarning

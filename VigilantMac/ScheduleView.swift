@@ -46,16 +46,18 @@ struct ScheduleView: View {
             Image(systemName: "calendar.badge.clock")
                 .font(.title2).foregroundStyle(.tint).frame(width: 30)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Follow work schedule").font(.headline)
-                Text("When on, Sentry only stays active during the enabled windows below and skips holidays. When off, it runs whenever Sentry is on.")
+                Text("Work schedule").font(.headline)
+                Text(controller.store.state.enabled
+                     ? "Sentry is on — active only during the enabled windows below, skipping holidays."
+                     : "When Sentry is on, it’s active only during the enabled windows below, skipping holidays.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
-            Toggle("", isOn: Binding(
-                get: { controller.store.state.scheduleEnabled },
-                set: { _ in controller.toggleSchedule() }
-            ))
-            .toggleStyle(.switch).labelsHidden()
+            Label(controller.store.state.enabled ? "On" : "Off",
+                  systemImage: controller.store.state.enabled ? "checkmark.circle.fill" : "circle")
+                .labelStyle(.iconOnly)
+                .foregroundStyle(controller.store.state.enabled ? .green : .secondary)
+                .font(.title3)
         }
         .padding(18)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))

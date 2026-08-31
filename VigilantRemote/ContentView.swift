@@ -2,13 +2,34 @@
 //  ContentView.swift
 //  Vigilant Remote (iOS)
 //
-//  One big switch, plus a live view of what the Mac Mini is doing.
+//  Tabbed remote: Home (the switch + live Mac status), Schedule (view/edit
+//  the work windows), and Log (a history of Sentry going on and off).
 //
 
 import SwiftUI
 
 struct ContentView: View {
     @Bindable var model: RemoteModel
+
+    var body: some View {
+        TabView {
+            HomeTab(model: model)
+                .tabItem { Label("Home", systemImage: "eye") }
+
+            ScheduleTab(model: model)
+                .tabItem { Label("Schedule", systemImage: "calendar") }
+
+            LogTab(model: model)
+                .tabItem { Label("Log", systemImage: "list.bullet.rectangle") }
+        }
+    }
+}
+
+// MARK: - Home
+
+struct HomeTab: View {
+    @Bindable var model: RemoteModel
+    @State private var showMemory = false
 
     private var state: VigilantState { model.store.state }
     private var macOnline: Bool { state.isMacOnline() }
@@ -18,15 +39,18 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     powerCard
+                    lunchCard
                     statusCard
                     monitoringSection
-                    scheduleCard
                     iCloudNotice
                 }
                 .padding()
             }
             .navigationTitle("Vigilant")
             .refreshable { model.refresh() }
+            .navigationDestination(isPresented: $showMemory) {
+                MemoryUsageView(snapshot: state.metrics)
+            }
         }
     }
 
@@ -44,13 +68,18 @@ struct ContentView: View {
 
             Toggle("Sentry", isOn: Binding(
                 get: { state.enabled },
-                set: { model.setEnabled($0) }
+                set: { model.setActive($0) }
             ))
             .labelsHidden()
             .toggleStyle(.switch)
             .scaleEffect(1.4)
             .padding(.vertical, 4)
             .disabled(model.isBusy)
+
+            Text("Runs on your work schedule — active during work hours, skipping holidays.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
 
             if model.isBusy {
                 ProgressView().controlSize(.small)
@@ -59,6 +88,79 @@ struct ContentView: View {
         .frame(maxWidth: .infinity)
         .padding(24)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    // MARK: - Lunch
+
+    @ViewBuilder
+    private var lunchCard: some View {
+        // A per-second tick so the countdown updates and the card flips itself
+        // when the break ends, even before the Mac clears the flag in CloudKit.
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let now = context.date
+            if let until = state.lunchUntil, until > now {
+                onLunchView(until: until, now: now)
+            } else if state.lunchUntil != nil {
+                // Expired locally; waiting for the Mac to resume Sentry.
+                Label("Resuming Sentry…", systemImage: "hourglass")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(20)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+            } else if state.enabled {
+                startLunchButton
+            }
+        }
+    }
+
+    private func onLunchView(until: Date, now: Date) -> some View {
+        VStack(spacing: 12) {
+            Label("On lunch", systemImage: "fork.knife")
+                .font(.headline)
+                .foregroundStyle(.orange)
+
+            Text(countdown(to: until, from: now))
+                .font(.system(size: 48, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+
+            Text("Sentry resumes at \(until.formatted(date: .omitted, time: .shortened))")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            Button(role: .cancel) { model.cancelLunch() } label: {
+                Label("Resume now", systemImage: "play.fill")
+            }
+            .buttonStyle(.bordered)
+            .disabled(model.isBusy)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(20)
+        .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var startLunchButton: some View {
+        Button { model.startLunch() } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "fork.knife").font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Take a lunch break").font(.headline)
+                    Text("Pause Sentry for 1 hour, then auto-resume")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .disabled(model.isBusy)
+    }
+
+    private func countdown(to until: Date, from now: Date) -> String {
+        let secs = max(0, Int(until.timeIntervalSince(now).rounded()))
+        return String(format: "%d:%02d", secs / 60, secs % 60)
     }
 
     // MARK: - Status
@@ -96,28 +198,9 @@ struct ContentView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
-            MetricsGrid(snapshot: state.metrics, stale: !macOnline)
+            MetricsGrid(snapshot: state.metrics, stale: !macOnline,
+                        onSelectMemory: { showMemory = true })
         }
-    }
-
-    // MARK: - Schedule
-
-    private var scheduleCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Toggle(isOn: Binding(
-                get: { state.scheduleEnabled },
-                set: { model.setScheduleEnabled($0) }
-            )) {
-                Text("Follow work schedule")
-                    .font(.subheadline.weight(.medium))
-            }
-            Text("When on, the Mac only stays active during your Mon–Fri work hours and skips holidays. When off, it runs whenever Sentry is on.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     @ViewBuilder

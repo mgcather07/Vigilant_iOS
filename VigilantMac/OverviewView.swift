@@ -69,7 +69,7 @@ struct OverviewView: View {
 
             Toggle("", isOn: Binding(
                 get: { state.enabled },
-                set: { _ in controller.toggleEnabled() }
+                set: { controller.setActive($0) }
             ))
             .toggleStyle(.switch)
             .labelsHidden()
@@ -89,29 +89,19 @@ struct OverviewView: View {
                 .frame(width: 32)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("Follow work schedule").font(.headline)
+                Text("Work schedule").font(.headline)
                 Text(scheduleSummary)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
-
-            Toggle("", isOn: Binding(
-                get: { state.scheduleEnabled },
-                set: { _ in controller.toggleSchedule() }
-            ))
-            .toggleStyle(.switch)
-            .labelsHidden()
         }
         .padding(18)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var scheduleSummary: String {
-        if !state.scheduleEnabled {
-            return "Off — Sentry stays on watch continuously while on duty."
-        }
         if let day = VigilantSettings.shared.schedule.todaysWindow() {
             return "Today: \(timeString(day.start))–\(timeString(day.end)), holidays skipped."
         }

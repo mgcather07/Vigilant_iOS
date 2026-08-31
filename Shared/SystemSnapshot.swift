@@ -9,6 +9,14 @@
 
 import Foundation
 
+/// One process's resident memory, for the "what's using memory" list.
+struct ProcessMemory: Codable, Sendable, Equatable, Identifiable {
+    var id: Int { pid }
+    var pid: Int
+    var name: String
+    var memoryBytes: UInt64
+}
+
 struct SystemSnapshot: Codable, Sendable, Equatable {
     var capturedAt: Date
 
@@ -50,6 +58,10 @@ struct SystemSnapshot: Codable, Sendable, Equatable {
     var loadAvg15: Double
     var cpuCoreCount: Int
     var processCount: Int
+
+    /// Top memory-consuming processes (resident size), largest first.
+    /// Defaulted for back-compat with snapshots encoded before this field.
+    var topMemoryProcesses: [ProcessMemory] = []
 
     // MARK: - Derived values
 
