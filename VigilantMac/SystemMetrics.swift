@@ -67,13 +67,18 @@ final class SystemMetrics {
         )
     }
 
-    // MARK: - Top memory processes
+    // MARK: - Top memory processes (grouped by app)
 
-    /// Top processes by **physical memory footprint** — the same metric
-    /// Activity Monitor's "Memory" column shows (it counts compressed memory
-    /// and shared pages the way the memory ledger does, unlike RSS). Read
-    /// per-process via `proc_pid_rusage`, which needs no special entitlement
-    /// for the current user's processes.
+    /// Top memory consumers, **grouped by owning app**, by physical memory
+    /// footprint — the same metric Activity Monitor's "Memory" column shows
+    /// (it counts compressed memory and shared pages the way the memory ledger
+    /// does, unlike RSS). Read per-process via `proc_pid_rusage`, which needs
+    /// no special entitlement for the current user's processes.
+    ///
+    /// Helpers roll up under their app (e.g. all "Claude Helper" processes →
+    /// "Claude"); XPC services without their own app bundle (the Virtualization
+    /// VM services) are attributed to their responsible app so the two show as
+    /// distinct apps rather than the same generic executable name.
     private func topMemoryProcesses(limit: Int = 25) -> [ProcessMemory] {
         let capacity = proc_listallpids(nil, 0)
         guard capacity > 0 else { return [] }
@@ -81,6 +86,7 @@ final class SystemMetrics {
         let returned = proc_listallpids(&pids, Int32(Int(capacity) * MemoryLayout<pid_t>.size))
         guard returned > 0 else { return [] }
 
+        // 1. Footprint for every accessible process.
         var footprints: [(pid: pid_t, bytes: UInt64)] = []
         footprints.reserveCapacity(Int(returned))
         for i in 0..<Int(returned) {
@@ -90,9 +96,24 @@ final class SystemMetrics {
         }
         footprints.sort { $0.bytes > $1.bytes }
 
-        return footprints.prefix(limit).map {
-            ProcessMemory(pid: Int($0.pid), name: processName(pid: $0.pid), memoryBytes: $0.bytes)
+        // 2. Resolve app names + aggregate. Only the biggest processes need the
+        //    (relatively expensive) name/responsibility resolution.
+        var groups: [String: (bytes: UInt64, count: Int, topPid: pid_t, topBytes: UInt64)] = [:]
+        for entry in footprints.prefix(80) {
+            let key = appGroupName(pid: entry.pid)
+            var g = groups[key] ?? (0, 0, 0, 0)
+            g.bytes &+= entry.bytes
+            g.count += 1
+            if entry.bytes > g.topBytes { g.topBytes = entry.bytes; g.topPid = entry.pid }
+            groups[key] = g
         }
+
+        return groups
+            .map { ProcessMemory(pid: Int($0.value.topPid), name: $0.key,
+                                 memoryBytes: $0.value.bytes, count: $0.value.count) }
+            .sorted { $0.memoryBytes > $1.memoryBytes }
+            .prefix(limit)
+            .map { $0 }
     }
 
     /// Physical memory footprint (bytes) for a pid, or nil if inaccessible.
@@ -106,17 +127,43 @@ final class SystemMetrics {
         return rc == 0 ? info.ri_phys_footprint : nil
     }
 
-    /// Best-effort human name for a pid: the executable's last path component.
-    private func processName(pid: pid_t) -> String {
-        var pathBuf = [CChar](repeating: 0, count: 4096)
-        if proc_pidpath(pid, &pathBuf, UInt32(pathBuf.count)) > 0 {
-            return shortProcessName(String(cString: pathBuf))
+    /// The app a process belongs to: its own `.app` bundle if it has one, else
+    /// its responsible process's app/name (covers XPC services and helpers),
+    /// else its own executable name.
+    private func appGroupName(pid: pid_t) -> String {
+        let path = pidPath(pid)
+        if let app = appBundleName(from: path) { return app }
+
+        let responsible = responsiblePid(pid)
+        if responsible > 0, responsible != pid {
+            let rPath = pidPath(responsible)
+            if let app = appBundleName(from: rPath) { return app }
+            let short = shortProcessName(rPath)
+            if !short.isEmpty { return short }
+        }
+        return shortProcessName(path)
+    }
+
+    /// Outermost `.app` bundle name in a path, e.g.
+    /// "/Applications/Google Chrome.app/.../Helper" → "Google Chrome".
+    private func appBundleName(from path: String) -> String? {
+        guard !path.isEmpty else { return nil }
+        for component in path.split(separator: "/") where component.hasSuffix(".app") {
+            return String(component.dropLast(4))
+        }
+        return nil
+    }
+
+    private func pidPath(_ pid: pid_t) -> String {
+        var buffer = [CChar](repeating: 0, count: 4096)
+        if proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 {
+            return String(cString: buffer)
         }
         var nameBuf = [CChar](repeating: 0, count: 256)
         if proc_name(pid, &nameBuf, UInt32(nameBuf.count)) > 0 {
             return String(cString: nameBuf)
         }
-        return "pid \(pid)"
+        return ""
     }
 
     /// Turn "/Applications/Foo.app/Contents/MacOS/Foo" into "Foo".
@@ -125,6 +172,21 @@ final class SystemMetrics {
             return String(path[path.index(after: slash)...])
         }
         return path
+    }
+
+    // The "responsible process" API (what Activity Monitor uses to attribute
+    // helpers/XPC services). Private, so look it up with dlsym — if it's ever
+    // absent we simply skip attribution instead of failing to launch.
+    private typealias ResponsibleFn = @convention(c) (pid_t) -> pid_t
+    private static let responsibleFn: ResponsibleFn? = {
+        let RTLD_DEFAULT = UnsafeMutableRawPointer(bitPattern: -2)
+        guard let sym = dlsym(RTLD_DEFAULT, "responsibility_get_pid_responsible_for_pid") else { return nil }
+        return unsafeBitCast(sym, to: ResponsibleFn.self)
+    }()
+
+    private func responsiblePid(_ pid: pid_t) -> pid_t {
+        guard let fn = Self.responsibleFn else { return 0 }
+        return fn(pid)
     }
 
     // MARK: - Load average & processes

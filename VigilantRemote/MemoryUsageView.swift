@@ -59,6 +59,13 @@ struct MemoryUsageView: View {
         return VStack(spacing: 5) {
             HStack(spacing: 8) {
                 Text(proc.name).lineLimit(1).truncationMode(.middle)
+                if proc.count > 1 {
+                    Text("\(proc.count) procs")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.secondary.opacity(0.15), in: Capsule())
+                }
                 Spacer(minLength: 6)
                 Text(MetricFormat.bytes(proc.memoryBytes))
                     .monospacedDigit().foregroundStyle(.secondary).fixedSize()

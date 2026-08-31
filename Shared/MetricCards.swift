@@ -323,6 +323,9 @@ struct TopMemoryCard: View {
         return VStack(spacing: 3) {
             HStack(spacing: 6) {
                 Text(proc.name).lineLimit(1).truncationMode(.middle)
+                if proc.count > 1 {
+                    Text("×\(proc.count)").foregroundStyle(.tertiary).fixedSize()
+                }
                 Spacer(minLength: 4)
                 Text(MetricFormat.bytes(proc.memoryBytes))
                     .monospacedDigit().foregroundStyle(.secondary).fixedSize()

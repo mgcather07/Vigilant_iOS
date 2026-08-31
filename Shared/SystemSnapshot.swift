@@ -9,12 +9,17 @@
 
 import Foundation
 
-/// One process's resident memory, for the "what's using memory" list.
+/// One row in the "what's using memory" list. When processes are grouped by
+/// app, `name` is the app name, `memoryBytes` is the group total, `count` is
+/// how many processes it covers, and `pid` is the largest contributor.
 struct ProcessMemory: Codable, Sendable, Equatable, Identifiable {
     var id: Int { pid }
     var pid: Int
     var name: String
     var memoryBytes: UInt64
+    /// Number of processes rolled into this row (1 = a single process).
+    /// Defaulted for back-compat with snapshots encoded before grouping.
+    var count: Int = 1
 }
 
 struct SystemSnapshot: Codable, Sendable, Equatable {
